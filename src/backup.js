@@ -16,9 +16,10 @@ const FILENAME_MATCH = /messages-([0-9]{1,})\.json/;
 const UPLOADED_IMAGE_MATCH = /https:\/\/graph.microsoft.com\/beta\/chats([^"]*)/g;
 
 class Backup {
-  constructor ({ chatId, authToken, target }) {
+  constructor ({ chatId, authToken, target, skipDownloadMess }) {
     this.target = target;
     this.chatId = chatId;
+    this.skipDownloadMess = skipDownloadMess;
     this.instance = axios.create({
       headers: {
         Accept: 'application/json, text/plain, */*',
@@ -31,7 +32,9 @@ class Backup {
 
   async run () {
     await this.createTarget();
-    await this.getMessages();
+    if (this.skipDownloadMess) {
+      await this.getMessages();
+    }
     await this.getImages();
     await this.createHtml();
   }
@@ -65,21 +68,24 @@ class Backup {
 
     while (true) {
       const pageNum = `0000${page++}`.slice(-5);
-
-      console.log(`retrieve page ${pageNum}`);
+      const pathMessageFile = path.resolve(this.target, `messages-${pageNum}.json`);
       const res = await this.instance.get(url);
-
-      if (res.data.value && res.data.value.length) {
-        await fsAPI.writeFile(
-          path.resolve(this.target, `messages-${pageNum}.json`),
-          JSON.stringify(res.data.value, null, '  '),
-          'utf8');
+      if (!fs.existsSync(pathMessageFile)) {
+        console.log(`retrieve page ${pageNum}`);
+        if (res.data.value && res.data.value.length) {
+          await fsAPI.writeFile(
+            path.resolve(this.target, `messages-${pageNum}.json`),
+            JSON.stringify(res.data.value, null, '  '),
+            'utf8');
+        }
+      } else {
+        console.log('File existed, skipping', pathMessageFile);
       }
-
       // if there's a next page (earlier messages) ...
       if (res.data['@odata.count'] && res.data['@odata.nextLink']) {
         // .. get these in the next round
         url = res.data['@odata.nextLink'];
+        console.log('Downloading: ', url);
       } else {
         // otherwise we're done
         break;
@@ -112,17 +118,24 @@ class Backup {
             for (const imageUrl of imageUrls) {
               if (!index[imageUrl]) {
                 const targetFilename = 'image-' + `0000${imageIdx++}`.slice(-5);
+                try {
+                  if (!fs.existsSync(path.resolve(this.target, targetFilename))) {
+                    console.log('downloading', targetFilename);
+                    const res = await this.instance({
+                      method: 'get',
+                      url: imageUrl,
+                      responseType: 'stream'
+                    });
 
-                console.log('downloading', targetFilename);
-
-                const res = await this.instance({
-                  method: 'get',
-                  url: imageUrl,
-                  responseType: 'stream'
-                });
-
-                res.data.pipe(fs.createWriteStream(path.resolve(this.target, targetFilename)));
-                await pipeDone(res.data);
+                    res.data.pipe(fs.createWriteStream(path.resolve(this.target, targetFilename)));
+                    await pipeDone(res.data);
+                  } else {
+                    console.log('Existed, skipping', targetFilename);
+                  }
+                } catch (er) {
+                  console.error('couldn\'t read images index', er);
+                  // continue without images
+                }
 
                 index[imageUrl] = targetFilename;
               }

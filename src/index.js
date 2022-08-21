@@ -20,11 +20,13 @@ async function main () {
   const chatId = await ask('Enter chat ID:');
   const authToken = await ask('Enter JWT:');
   const target = await ask('Enter target directory name:');
+  const skipDownloadMess = await ask('Do you want to skip download messages?:');
 
   const backup = new Backup({
     chatId,
     authToken,
-    target: `out/${target}`
+    target: `out/${target}`,
+    skipDownloadMess
   });
 
   return backup.run();
