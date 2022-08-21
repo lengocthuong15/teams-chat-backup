@@ -31,12 +31,13 @@ class Backup {
   }
 
   async run () {
-    await this.createTarget();
-    if (this.skipDownloadMess) {
-      await this.getMessages();
-    }
-    await this.getImages();
-    await this.createHtml();
+    await this.checkUserId(`tham`);
+    // await this.createTarget();
+    // if (this.skipDownloadMess) {
+    //   await this.getMessages();
+    // }
+    // await this.getImages();
+    // await this.createHtml();
   }
 
   createTarget (location) {
@@ -59,6 +60,14 @@ class Backup {
 
       probe(path.resolve(this.target), resolve);
     });
+  }
+
+  async  checkUserId(displayName) {
+    let url = `https://graph.microsoft.com/beta/users?$count=true&$search="displayName:${displayName}"&$orderBy=displayName&$select=id,displayName,mail`;
+    const res = await this.instance.get(url);
+    if (res.data.value && res.data.value.length) {
+      console.log(res.data);
+    }
   }
 
   async getMessages () {

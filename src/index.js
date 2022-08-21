@@ -1,5 +1,10 @@
+const { resolve } = require('path');
 const readline = require('readline');
 const Backup = require('./backup');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const axios = require('axios');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -16,11 +21,16 @@ function ask (question) {
   });
 }
 
+
 async function main () {
-  const chatId = await ask('Enter chat ID:');
   const authToken = await ask('Enter JWT:');
-  const target = await ask('Enter target directory name:');
-  const skipDownloadMess = await ask('Do you want to skip download messages?:');
+  // const chatId = await ask('Enter chat ID:');
+  // const target = await ask('Enter target directory name:');
+  // const skipDownloadMess = await ask('Do you want to skip download messages?:');
+
+  const chatId = `abc`;
+  const target = `xyz`;
+  const skipDownloadMess = 'yes';
 
   const backup = new Backup({
     chatId,
