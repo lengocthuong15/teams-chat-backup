@@ -1,8 +1,8 @@
 # Microsoft Teams Chat Backup
 
-######This project is forked from: https://github.com/edgraaff/teams-chat-backup
+###### This project is forked from: https://github.com/edgraaff/teams-chat-backup
 
-##Enhancement:
+## Enhancement:
 
 I've added more options and feature for easy backup a chat:
 - Search user id through user displayname
@@ -12,7 +12,8 @@ I've added more options and feature for easy backup a chat:
   - Skip download images: `skipimg`
 - Add Darkmode for the final output. Adjust body to center.
 
-##Purpose and output
+## Purpose and output
+
 This project retrieves a full chat history (messages and uploaded files) and renders it as an HTML.
 
 ## Requirements
@@ -47,7 +48,7 @@ To skip download messages and images run
 npm run start skipmess skipimg
 ```
 
-####This will ask several questions:
+#### This will ask several questions:
 
 **Your display name:** - Your display name. Example: John. If there are similar name in the company, the sugesst list will appear, you just need to re-run the program again with the correct one.
 
@@ -59,11 +60,11 @@ npm run start skipmess skipimg
 2. After having logged in, on the right side (where you clicked for login), click on the User's Icon and then click `Consent to permissions`. Enable `Chat.Read` and `User.ReadBasic.All`
 3. In the Main Window, you will see multilples tab name like `Request body`, `Request headers`, etc. Click on the tab `Access token` . Copy this value. 
 
-####Note:
+#### Note:
 - Your name, when first inputed, will be cached, for later use. If you want to clear it. Please remove the folder: `teams-chat-backup\dat\`
 - You Access Token (JWT): when first inputed, will be cached for later use
 
-####The out put will be
+#### The out put will be
 
 The exported folder (will be created in the `teams-chat-backup\out\` directory in this project). And the name of sub folder is the name of your friend's displayname.
 
