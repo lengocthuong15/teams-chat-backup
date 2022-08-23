@@ -10,6 +10,7 @@ I've added more options and feature for easy backup a chat:
 - Add the options for
   - Skip download messages: `skipmess`
   - Skip download images: `skipimg`
+  - Use Chat ID instead of user display name: `usechatid`
 - Add Darkmode for the final output. Adjust body to center.
 
 ## Purpose and output
@@ -56,8 +57,10 @@ npm run start skipmess skipimg
 
 #### This will ask several questions:
 ##### Chat ID
-**Chat Id:** - If you use `usechatid` option, the program need chat id inorder to get the messages. Pleas login into MS Teams in Web browser: https://teams.microsoft.com/. Chose a chat or group or even team (channel)
-There will be something like that in the URL: `teams.microsoft.com/_#/conversations/19:<somee_id>@thread.v2?ctx=chat` -> **19:<some_id>@thread.v2** will be your chat id
+**Chat Id:** - If you use `usechatid` option, the program need chat id inorder to get the messages. Please login into MS Teams in Web browser: https://teams.microsoft.com/. Chose a chat or group or even team (channel)
+There will be something like that in the URL: `teams.microsoft.com/_#/conversations/19:<somee_id>@thread.v2?ctx=chat` ->
+
+ `19:<some_id>@thread.v2` will be your chat id
 
 **Your display name:** - Your display name. Example: John. If there are similar name in the company, the sugesst list will appear, you just need to re-run the program again with the correct one.
 
