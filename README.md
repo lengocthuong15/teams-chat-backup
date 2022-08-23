@@ -1,5 +1,18 @@
 # Microsoft Teams Chat Backup
 
+######This project is forked from: https://github.com/edgraaff/teams-chat-backup
+
+##Enhancement:
+
+I've added more options and feature for easy backup a chat:
+- Search user id through user displayname
+- Auto search for chat id
+- Add the options for
+  - Skip download messages: `skipmess`
+  - Skip download images: `skipimg`
+- Add Darkmode for the final output. Adjust body to center.
+
+##Purpose and output
 This project retrieves a full chat history (messages and uploaded files) and renders it as an HTML.
 
 ## Requirements
@@ -19,24 +32,40 @@ npm install
 To backup a chat, run:
 
 ```sh
-npm run start
+npm run start 
 ```
 
-This will ask several questions:
+To skip download messages, run
 
-**Chat ID** - this is the identifier of the conversation. To find it:
+```sh
+npm run start skipmess
+```
 
-1. Go to [https://teams.microsoft.com](https://teams.microsoft.com)
-2. Go to the chat you'd like to export.
-3. Copy chat ID from URL. It looks like `19:<uuid of one user>-<uuid of other user>@unq.gbl.spaces`
+To skip download messages and images run
+
+```sh
+npm run start skipmess skipimg
+```
+
+####This will ask several questions:
+
+**Your display name:** - Your display name. Example: John. If there are similar name in the company, the sugesst list will appear, you just need to re-run the program again with the correct one.
+
+**Friend's display name:** - Friend's display name. Name of the guys that you want to backup chat messages.
 
 **Auth token (JWT)** - this is needed for calling Microsoft Graph APIs.
 
-1. Go to [https://developer.microsoft.com/en-us/graph/graph-explorer](https://developer.microsoft.com/en-us/graph/graph-explorer). At the left side, under Authentication, click "Sign In with Microsoft"
-2. After having logged in, on the left side (where you clicked for login), click "modify permissions". Enable `Chat.Read` and re-login (like it states).
-3. The URL contains the token (`#access_token=<long token goes here>`). Copy this value. Or make any random call in the sandbox and copy the Authorization request header either from the JS console (without `Bearer ` in front of it) or from the "Access token" tab of the Graph Explorer page.
+1. Go to [https://developer.microsoft.com/en-us/graph/graph-explorer](https://developer.microsoft.com/en-us/graph/graph-explorer). At the top right side, under User icon, click it to sign-in.
+2. After having logged in, on the right side (where you clicked for login), click on the User's Icon and then click `Consent to permissions`. Enable `Chat.Read` and `User.ReadBasic.All`
+3. In the Main Window, you will see multilples tab name like `Request body`, `Request headers`, etc. Click on the tab `Access token` . Copy this value. 
 
-**Target directory name** - is the name to use for the export (will be created in the `out` directory in this project).
+####Note:
+- Your name, when first inputed, will be cached, for later use. If you want to clear it. Please remove the folder: `teams-chat-backup\dat\`
+- You Access Token (JWT): when first inputed, will be cached for later use
+
+####The out put will be
+
+The exported folder (will be created in the `teams-chat-backup\out\` directory in this project). And the name of sub folder is the name of your friend's displayname.
 
 # Output
 
