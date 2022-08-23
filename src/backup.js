@@ -16,13 +16,17 @@ const FILENAME_MATCH = /messages-([0-9]{1,})\.json/;
 const UPLOADED_IMAGE_MATCH = /https:\/\/graph.microsoft.com\/beta\/chats([^"]*)/g;
 
 class Backup {
-  constructor ({ chatId, authToken, target, skipDownloadMess }) {
+  constructor ({ yourDisplayName, friendDisplayName, chatId, authToken, target, skipDownloadMess, skipDownloadImage }) {
+    this.yourDisplayName = yourDisplayName;
+    this.friendDisplayName = friendDisplayName;
     this.target = target;
     this.chatId = chatId;
     this.skipDownloadMess = skipDownloadMess;
+    this.skipDownloadImage = skipDownloadImage;
     this.instance = axios.create({
       headers: {
         Accept: 'application/json, text/plain, */*',
+        ConsistencyLevel: 'eventual',
         Authorization: `Bearer ${authToken}`,
         'Sec-Fetch-Mode': 'cors',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
@@ -31,13 +35,34 @@ class Backup {
   }
 
   async run () {
-    await this.checkUserId(`tham`);
-    // await this.createTarget();
-    // if (this.skipDownloadMess) {
-    //   await this.getMessages();
-    // }
-    // await this.getImages();
-    // await this.createHtml();
+    const userId = await this.checkUserId(this.yourDisplayName);
+    if (!userId) {
+      // Remove cache
+      const userDisplayPath = path.resolve('dat/user.dat');
+      fs.unlinkSync(userDisplayPath);
+      return false;
+    }
+    this.target = this.friendDisplayName.replace(/\s/g, '');
+    this.target = `out/${this.target}`;
+    const friendId = await this.checkUserId(this.friendDisplayName);
+    if (!friendId) {
+      return false;
+    }
+    this.chatId = `19:${friendId}_${userId}@unq.gbl.spaces`;
+    console.log(`You chatId with ${this.friendDisplayName}: `, this.chatId);
+    await this.createTarget();
+    if (!this.skipDownloadMess) {
+      await this.getMessages();
+    } else {
+      console.log('Skip download messages');
+    }
+    if (!this.skipDownloadImage) {
+      await this.getImages();
+    } else {
+      console.log('Skip download images');
+    }
+    await this.createHtml();
+    console.log('Output file in: ', path.resolve(this.target, 'index.html'));
   }
 
   createTarget (location) {
@@ -62,17 +87,37 @@ class Backup {
     });
   }
 
-  async  checkUserId(displayName) {
-    let url = `https://graph.microsoft.com/beta/users?$count=true&$search="displayName:${displayName}"&$orderBy=displayName&$select=id,displayName,mail`;
-    const res = await this.instance.get(url);
-    if (res.data.value && res.data.value.length) {
-      console.log(res.data);
+  async checkUserId (displayName) {
+    console.log('Checking user id of: ', displayName);
+    const url = `https://graph.microsoft.com/v1.0/users?$count=true&$search="displayName:${displayName}"`;
+    let res;
+    try {
+      res = await this.instance.get(url);
+    } catch {
+      console.log('Error when trying to getting user via display name, might be your token is expired');
+      return '';
+    }
+    const resValue = res.data.value;
+    if (resValue && resValue.length) {
+      if (res.data['@odata.count'] === 1) {
+        console.log(`The id of ${displayName} = `, resValue[0].id);
+        return resValue[0].id;
+      } else {
+        console.log('We found more than one user that have the display name that you inputed, please re-run the programe and input the right one');
+        // console.log(res.data);
+        console.log('Suggested name: ');
+        for (let i = 0; i < resValue.length; i++) {
+          const mail = resValue[i].mail;
+          console.log(resValue[i].displayName, ` - ${mail}`);
+        }
+        return '';
+      }
     }
   }
 
   async getMessages () {
     // URL to first page (most recent messages)
-    let url = `https://graph.microsoft.com/beta/me/chats/${this.chatId}/messages`;
+    let url = `https://graph.microsoft.com/beta/me/chats/${this.chatId}/messages?$top=50`;
     let page = 0;
 
     while (true) {
@@ -94,7 +139,7 @@ class Backup {
       if (res.data['@odata.count'] && res.data['@odata.nextLink']) {
         // .. get these in the next round
         url = res.data['@odata.nextLink'];
-        console.log('Downloading: ', url);
+        // console.log('Downloading: ', url);
       } else {
         // otherwise we're done
         break;
