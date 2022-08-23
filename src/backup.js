@@ -35,21 +35,24 @@ class Backup {
   }
 
   async run () {
-    const userId = await this.checkUserId(this.yourDisplayName);
-    if (!userId) {
-      // Remove cache
-      const userDisplayPath = path.resolve('dat/user.dat');
-      fs.unlinkSync(userDisplayPath);
-      return false;
+    if (!this.chatId) {
+      const userId = await this.checkUserId(this.yourDisplayName);
+      if (!userId) {
+        // Remove cache
+        const userDisplayPath = path.resolve('dat/user.dat');
+        fs.unlinkSync(userDisplayPath);
+        return false;
+      }
+      const friendId = await this.checkUserId(this.friendDisplayName);
+      if (!friendId) {
+        return false;
+      }
+      this.chatId = `19:${friendId}_${userId}@unq.gbl.spaces`;
+      this.target = this.friendDisplayName.replace(/\s/g, '');
+      this.target = `out/${this.target}`;
     }
-    this.target = this.friendDisplayName.replace(/\s/g, '');
-    this.target = `out/${this.target}`;
-    const friendId = await this.checkUserId(this.friendDisplayName);
-    if (!friendId) {
-      return false;
-    }
-    this.chatId = `19:${friendId}_${userId}@unq.gbl.spaces`;
-    console.log(`You chatId with ${this.friendDisplayName}: `, this.chatId);
+
+    console.log('You chatId with: ', this.chatId);
     await this.createTarget();
     if (!this.skipDownloadMess) {
       await this.getMessages();

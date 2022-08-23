@@ -51,14 +51,19 @@ async function main () {
   // Checking for user display name first
   let skipDownloadMess = false;
   let skipDownloadImage = false;
+  let useChatid = false;
   const skipMessStr = 'skipmess';
   const skipImageStr = 'skipimg';
+  const useChatIdStr = 'usechatid';
   for (let i = 0; i < myArgs.length; i++) {
     if (myArgs[i] === skipMessStr) {
       skipDownloadMess = true;
     }
     if (myArgs[i] === skipImageStr) {
       skipDownloadImage = true;
+    }
+    if (myArgs[i] === useChatIdStr) {
+      useChatid = true;
     }
   }
   const datLocation = 'dat';
@@ -67,7 +72,7 @@ async function main () {
   }
   const userDisplayPath = path.resolve(`${datLocation}/user.dat`);
   let yourDisplayName = '';
-  if (!fs.existsSync(userDisplayPath)) {
+  if (!fs.existsSync(userDisplayPath) && !useChatid) {
     yourDisplayName = await ask('Your display name: ');
     await fsAPI.writeFile(
       path.resolve(userDisplayPath),
@@ -75,12 +80,14 @@ async function main () {
       'utf8');
   } else {
     // Read user displayname from cache file
-    try {
-      const data = fs.readFileSync(userDisplayPath, 'utf8');
-      yourDisplayName = data;
-    } catch (err) {
-      console.error('Could not read user display name from cache', err);
-      return;
+    if (!useChatid) {
+      try {
+        const data = fs.readFileSync(userDisplayPath, 'utf8');
+        yourDisplayName = data;
+      } catch (err) {
+        console.error('Could not read user display name from cache', err);
+        return;
+      }
     }
   }
 
@@ -125,8 +132,15 @@ async function main () {
       'utf8');
   }
 
-  const friendDisplayName = await ask('Friend\'s display name: ');
-  // const chatId = await ask('Enter chat ID:');
+  let chatId = '';
+  let target = '';
+  let friendDisplayName = '';
+  if (useChatid) {
+    chatId = await ask('Enter chat ID:');
+    target = await ask('Enter target directory name:');
+  } else {
+    friendDisplayName = await ask('Friend\'s display name: ');
+  }
   // const target = await ask('Enter target directory name:');
   // const skipDownloadMessStr = await ask('Do you want to skip download messages? [y/n]:');
   // let skipDownloadMess = false;
@@ -134,8 +148,6 @@ async function main () {
   //   skipDownloadMess = true;
   // }
 
-  const chatId = '';
-  const target = '';
   // const skipDownloadMess = 'yes';
 
   const backup = new Backup({
