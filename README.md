@@ -30,10 +30,16 @@ npm install
 
 # Run
 
-To backup a chat, run:
+To backup a chat with friend's display name, run:
 
 ```sh
 npm run start 
+```
+
+To backup a chat with chat id ([How to get chat id](#Chat-ID)), run
+
+```sh
+npm run start usechatid
 ```
 
 To skip download messages, run
@@ -49,6 +55,9 @@ npm run start skipmess skipimg
 ```
 
 #### This will ask several questions:
+##### Chat ID
+**Chat Id:** - If you use `usechatid` option, the program need chat id inorder to get the messages. Pleas login into MS Teams in Web browser: https://teams.microsoft.com/. Chose a chat or group or even team (channel)
+There will be something like that in the URL: `teams.microsoft.com/_#/conversations/19:<somee_id>@thread.v2?ctx=chat` -> **19:<some_id>@thread.v2** will be your chat id
 
 **Your display name:** - Your display name. Example: John. If there are similar name in the company, the sugesst list will appear, you just need to re-run the program again with the correct one.
 
